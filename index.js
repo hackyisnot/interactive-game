@@ -5,10 +5,6 @@ function hideElement(element) {
     element.style.visibility = 'hidden';
 }
 
-function menuClick() {
-    playMenuClickSound();
-}
-
 function showElement(element) {
     if (!element) return;
     element.style.display = 'flex';
@@ -16,11 +12,16 @@ function showElement(element) {
     element.style.visibility = 'visible';
 }
 
+function menuClick() {
+    playMenuClickSound();
+}
+
 function initializeSequence() {
     const landing = document.getElementById('landing-screen');
     const intro = document.getElementById('intro');
     const splash = document.getElementById('splash');
-    const splatter = document.querySelector('splatterMenu');
+    const splatter = document.querySelector('.splatterMenu');
+    const splatter2 = document.querySelector('.splatterMenu2');
     const menu = document.getElementById('menu');
     const music = document.getElementById('introMusic');
     const menuButtons = document.querySelectorAll('#menu button');
@@ -32,7 +33,6 @@ function initializeSequence() {
     let introSequenceStarted = false;
     const splashShowDelay = 8000;
     const splashVisibleDuration = 5000;
-    const splashFadeDuration = 1000;
     const splashDisappearDelay = splashShowDelay + splashVisibleDuration;
 
     function hideSkipButton() {
@@ -47,9 +47,6 @@ function initializeSequence() {
         skipButton.style.display = 'inline-block';
         skipButton.style.opacity = '1';
         skipButton.style.visibility = 'visible';
-        skipButton.style.position = 'fixed';
-        skipButton.style.top = '1.5rem';
-        skipButton.style.right = '1.5rem';
     }
 
     function clearIntroTimers() {
@@ -69,17 +66,18 @@ function initializeSequence() {
 
     function startIntroSequence() {
         if (introSequenceStarted) return;
-
         introSequenceStarted = true;
         clearIntroTimers();
 
         if (music) {
             music.volume = 0.35;
             music.currentTime = 0;
-            music.play().catch(err => console.log('Audio playback blocked:', err));
+            music.play().catch((err) => console.log('Audio playback blocked:', err));
         }
 
-        hideElement(landing);
+        if (landing) {
+            hideElement(landing);
+        }
 
         if (intro) {
             intro.style.display = 'flex';
@@ -94,6 +92,8 @@ function initializeSequence() {
             splashTimer = null;
             if (splash) {
                 splash.style.display = 'flex';
+                splash.classList.remove('hiding');
+                splash.classList.add('showing');
                 splash.style.opacity = '1';
                 splash.style.visibility = 'visible';
             }
@@ -102,25 +102,32 @@ function initializeSequence() {
         splashHideTimer = setTimeout(() => {
             splashHideTimer = null;
             if (splash) {
-                splash.style.opacity = '0';
-                splash.style.display = 'none';
-                splash.style.visibility = 'hidden';
+                splash.classList.remove('showing');
+                splash.classList.add('hiding');
             }
         }, splashDisappearDelay);
 
         menuTimer = setTimeout(() => {
             menuTimer = null;
             hideSkipButton();
-
+            if (splash) {
+                splash.style.display = 'none';
+                splash.style.opacity = '0';
+                splash.style.visibility = 'hidden';
+            }
             if (menu) {
                 menu.style.display = 'flex';
                 menu.style.opacity = '1';
                 menu.style.visibility = 'visible';
+                menu.classList.add('show-menu');
             }
             if (splatter) {
                 splatter.classList.add('active');
             }
-        }, splashDisappearDelay + 100);
+            if (splatter2) {
+                splatter.classList.add('active2');
+            }
+        }, splashDisappearDelay + 700);
     }
 
     function skipIntroSequence() {
@@ -130,6 +137,7 @@ function initializeSequence() {
         clearIntroTimers();
         hideElement(landing);
         hideElement(intro);
+
         if (splash) {
             splash.classList.remove('showing');
             splash.classList.remove('hiding');
@@ -143,12 +151,20 @@ function initializeSequence() {
             menu.style.display = 'flex';
             menu.style.opacity = '1';
             menu.style.visibility = 'visible';
+            menu.classList.add('show-menu');
+        }
+
+        if (splatter) {
+            splatter.classList.add('active');
+        }
+        if (splatter2) {
+            splatter.classList.add('active2');
         }
 
         if (music) {
             music.volume = 0.35;
             music.currentTime = 20;
-            music.play().catch(err => console.log('Audio playback blocked:', err));
+            music.play().catch((err) => console.log('Audio playback blocked:', err));
         }
     }
 
@@ -177,7 +193,6 @@ if (document.readyState === 'loading') {
 } else {
     initializeSequence();
 }
-
 
 function playMenuClickSound() {
     const clickSound = document.getElementById('click');
